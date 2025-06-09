@@ -43,7 +43,7 @@ jobs:
         run: |
           cd packages/uv-p1
           old_version=$(convco version)
-          if [ $old_version = "0.0.0" ];
+          if [ $old_version = "0.0.0" ]; then
             new_version="1.0.0"
           else
             new_version=$($base_version_command --bump)
