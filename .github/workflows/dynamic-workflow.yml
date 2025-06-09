@@ -52,6 +52,8 @@ jobs:
           echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
           echo "NEW_TAG=$new_tag" >> $GITHUB_ENV
       - name: Generate packages
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           cd packages/uv-p1
           ########################################
