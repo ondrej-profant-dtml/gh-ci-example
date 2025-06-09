@@ -24,3 +24,22 @@ jobs:
           uv run --group dev ruff --config ../../ruff.toml check .
           uv run --group dev ruff --config ../../ruff.toml format . --check
           uv run --group dev pytest tests/
+
+  generate_packages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install os dependencies
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          apt-get update && apt-get install -y twine
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          cd packages/uv-p1
+          uv sync
+      - name: Generate packages
+        run: |
+          cd packages/uv-p1
+          uv build
+          twine check dist/*
+          # twine upload dist/* --non-interactive
