@@ -19,7 +19,7 @@ jobs:
           cd packages/uv-p1
           uv sync
       - name: Run checks
-         run: |
+        run: |
           cd packages/uv-p1
           uv run --group dev ruff --config ../../ruff.toml check .
           uv run --group dev ruff --config ../../ruff.toml format . --check
