@@ -5,6 +5,7 @@ on: [push]
 env:
   CHANGELOG_FILE: CHANGELOG.md
   FULL_CHANGELOG_FILE: FULL_CHANGELOG.md
+  CONVCO_VERSION: v0.4.1
 
 jobs:
   packages_test:
@@ -31,18 +32,51 @@ jobs:
       - name: Install os dependencies
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
-      - name: Convco install
-        uses: convco/convco-action@v0.2.0
-        with:
-          -V
+          curl -sSfL "https://github.com/convco/convco/releases/download/${{ env.CONVCO_VERSION }}/convco-ubuntu.zip" | zcat > /usr/local/bin/convco
+          chmod +x /usr/local/bin/convco
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
           cd packages/uv-p1
           uv sync
+      - name: Set Variables
+        run: |
+          cd packages/uv-p1
+          old_version=$(convco version)
+          if [ $old_version = "0.0.0" ];
+            new_version="1.0.0"
+          else
+            new_version=$($base_version_command --bump)
+          fi
+          echo "OLD_VERSION=$old_version" >> $GITHUB_ENV
+          echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
+          echo "NEW_TAG=$new_tag" >> $GITHUB_ENV
       - name: Generate packages
         run: |
           cd packages/uv-p1
+          ########################################
+          # Generate changelogs
+          ########################################
+          base_changelog_command="
+            convco
+            changelog
+            --unreleased=${{ env.NEW_TAG }}
+          "
+          $base_changelog_command --max-versions=1 > ${{ env.CHANGELOG_FILE }}
+          $base_changelog_command > ${{ env.FULL_CHANGELOG_FILE }}
+
+          ########################################
+          # Create GitHub Release
+          ########################################
+          gh release create \
+            ${{ env.NEW_VERSION}} \
+            --title ${{ env.NEW_VERSION }} \
+            --notes-file ${{ env.CHANGELOG_FILE }} \
+            ${{ env.FULL_CHANGELOG_FILE }}
+
+          ########################################
+          # Publish to JFrog
+          ########################################
           uv build
           uv run --group dev twine check dist/*
-          # twine upload dist/* --non-interactive
+          # uv run --group dev twine upload dist/* --non-interactive
