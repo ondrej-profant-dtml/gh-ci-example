@@ -32,7 +32,9 @@ jobs:
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
       - name: Convco install
-          uses: convco/convco-action@v0.2.0
+        uses: convco/convco-action@v0.2.0
+        with:
+          -V
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
