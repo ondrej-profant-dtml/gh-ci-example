@@ -1,0 +1,25 @@
+line-length = 79
+namespace-packages = ["packages"]
+
+[lint]
+select = ["E", "F", "I", "N", "PL", "RUF", "W"]
+
+ignore = [
+    # PLR2004 suggests replacing "magic values" with explicit constants.
+    # However, the constants are often obvious, for example HTTP status codes
+    # or small constants like 3.
+    "PLR2004",
+    # TODO: enable all these rules or reconfigure settings (e.g. allow more attributes) after refactoring
+    "N818",
+    "PLW2901",
+]
+
+[lint.pylint]
+max-args = 10
+
+[lint.per-file-ignores]
+"__init__.py" = ["F401"]  # TODO: use reexports: https://docs.astral.sh/ruff/rules/unused-import/
+"**/tests/*.py" = ["E402", "N806"]
+
+[format]
+quote-style = "preserve"  # TODO: change to single after refactoring
